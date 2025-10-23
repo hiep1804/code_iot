@@ -23,6 +23,14 @@ long long begin_time = 0;
 void setup()
 {
   Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  Serial.print("Đang kết nối Wi-Fi...");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Đã kết nối Wi-Fi!");
   pinMode(redPin, OUTPUT);
   pinMode(greenPin, OUTPUT);
   pinMode(bluePin, OUTPUT);
@@ -48,13 +56,6 @@ void statusFromSensor(){
 void loop()
 {
   long long milis = millis();
-  //getColorFromServer();
-  statusFromSensor();
-  long long period = millis() - milis;
-  long long t = period / 1000;
-  delay((t + 1) * 1000 - period); // gửi request mỗi 1 giây
-}
-void getColorFromServer(){
   if (WiFi.status() == WL_CONNECTED)
   {
     HTTPClient http;
@@ -84,6 +85,9 @@ void getColorFromServer(){
         Serial.printf("r=%d, g=%d, b=%d, level=%d\n", r, g, b, level);
         setColor(r, g, b);
       }
+      if(type=="tự động"){
+        statusFromSensor();
+      }
     }
     else
     {
@@ -92,4 +96,7 @@ void getColorFromServer(){
 
     http.end(); // đóng kết nối
   }
+  long long period = millis() - milis;
+  long long t = period / 200;
+  delay((t + 1) * 200 - period); // gửi request mỗi 1 giây
 }
